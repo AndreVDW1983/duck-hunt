@@ -72,7 +72,7 @@ footer { margin-top: 28px; text-align: center; font-size: 14px; font-weight: 700
    same GitHub repository as this file.
    ======================================================= */
 /* The hunt the Start button on the rules page opens. Change to "h2", "h3" and so on. */
-const CURRENT_HUNT = "h2";
+const CURRENT_HUNT = "h3";
 
 const HUNTS = {
   h1: {
@@ -133,6 +133,39 @@ const HUNTS = {
         answers: ["5", "five"],
         hint: "Compare one row at a time. Check for missing ducks, hats, beaks and which way each duck faces.",
         next: "Final riddle: I have a face but no eyes, and hands but I can't clap. Everyone glances at me before the bell. The duck is perched near me. Find it, claim it, keep it on your desk."
+      }
+    ]
+  },
+  h3: {
+    name: "Hunt 3",
+    challenges: [
+      {
+        type: "riddle",
+        title: "Look Closer",
+        prompt: "This was photographed somewhere in the staffroom. Whose desk is it on? Type their surname.",
+        image: "h3-look-closer.jpg",
+        imageAlt: "A sideways close-up of red letters on a book",
+        answers: ["lumley", "mr lumley", "stephen lumley", "steve lumley", "stephen", "steve", "mr l"],
+        hint: "It's a science book, and its owner hasn't needed it for a while.",
+        next: "Head to that desk. The next code is with the book. Please leave everything as you found it."
+      },
+      {
+        type: "riddle",
+        title: "The Gatekeeper",
+        prompt: "The password for this challenge isn't written anywhere. It's guarded by the Gatekeeper. Here's what we know: they work with numbers all day, they grew up on the other side of the world, and they still haven't forgiven Argentina for 1986. Below is a very, very close look at them. Track them down and ask for the password. Be warned, the Gatekeeper only hands it over in exchange for a dad joke, so make it a good one.",
+        image: "h3-gatekeeper.jpg",
+        imageAlt: "An extreme close-up photo of the Gatekeeper",
+        answers: ["quackers", "quackers!"],
+        hint: "Listen for the accent, and maybe don't mention Maradona.",
+        next: "The next code is stuck to the back of the staffroom door. Close it gently."
+      },
+      {
+        type: "odd",
+        title: "Odd Duck Out",
+        prompt: "Every duck in this pond has an identical twin, except one. Twins have the same hat, the same beak colour, the same body colour and face the same way. What number is the odd duck out?",
+        seed: 1211, pairs: 12,
+        hint: "Sort them in your head: start with the party hats and find each one's twin, then move on to the caps.",
+        next: "Final riddle: I'm a hole in the wall you can see straight through, yet nothing ever gets in. The duck is sunbathing on my sill. Find it, claim it, keep it on your desk."
       }
     ]
   }
@@ -197,18 +230,49 @@ function spotSvg(c) {
   return drawPond(A, "Pond A") + drawPond(B, "Pond B");
 }
 
+/* Odd duck out: every duck has an identical twin except one. Twins match on hat, beak, body colour and facing direction. */
+function oddLayout(c) {
+  const r = rng(c.seed), combos = [];
+  for (const hat of ["", "cap", "party"]) for (const beak of ["#e07b22", "#6d1a2a"]) for (const flip of [1, -1]) for (const body of ["#ffcf1f", "#ffffff"]) combos.push({ hat, beak, flip, body });
+  for (let i = combos.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [combos[i], combos[j]] = [combos[j], combos[i]]; }
+  const pick = combos.slice(0, c.pairs + 1), list = [];
+  pick.forEach((d, k) => { list.push(d); if (k < c.pairs) list.push(d); });
+  for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+  const odd = list.indexOf(pick[c.pairs]) + 1;
+  return { list, odd };
+}
+
+function oddSvg(c) {
+  const { list } = oddLayout(c), cols = 5, cw = 110, rh = 92, W = cols * cw, H = Math.ceil(list.length / cols) * rh + 16;
+  let g = "";
+  list.forEach((d, i) => {
+    const x = (i % cols) * cw + 58, y = Math.floor(i / cols) * rh + 60;
+    let h = "";
+    if (d.hat === "cap") h = `<rect x="6" y="-35" width="22" height="5" fill="#111"/><rect x="12" y="-32" width="10" height="6" fill="#111"/><line x1="26" y1="-33" x2="29" y2="-24" stroke="#6d1a2a" stroke-width="2"/>`;
+    if (d.hat === "party") h = `<polygon points="10,-29 24,-29 17,-46" fill="#6d1a2a"/><circle cx="17" cy="-46" r="2.5" fill="#111"/>`;
+    g += `<text x="${x - 46}" y="${y - 30}" font-family="Arial, sans-serif" font-weight="700" font-size="16" fill="#111">${i + 1}</text>
+    <g transform="translate(${x} ${y}) scale(${d.flip * 0.95} 0.95)">
+      <ellipse cx="0" cy="0" rx="26" ry="16" fill="${d.body}" stroke="#111" stroke-width="1.5"/>
+      <path d="M-24,-4 L-34,-12 L-26,4 Z" fill="${d.body}" stroke="#111" stroke-width="1.5"/>
+      <circle cx="17" cy="-18" r="12" fill="${d.body}" stroke="#111" stroke-width="1.5"/>
+      <path d="M26,-23 L44,-17 L26,-11 Z" fill="${d.beak}" stroke="#111" stroke-width="1"/>
+      <circle cx="20" cy="-21" r="2" fill="#111"/>${h}</g>`;
+  });
+  return `<svg class="pond" viewBox="0 0 ${W} ${H}" role="img" aria-label="A numbered pond of ducks, each with a twin except one">${g}</svg>`;
+}
+
 function render() {
   const m = location.hash.match(/^#(h\d+)-(\d)$/);
   if (!m || !HUNTS[m[1]] || !HUNTS[m[1]].challenges[m[2] - 1]) return home();
   const hunt = HUNTS[m[1]], i = m[2] - 1, c = hunt.challenges[i], last = i === hunt.challenges.length - 1;
-  const answers = c.type === "ducks" ? [String(c.caps), ["zero","one","two","three","four","five","six","seven","eight","nine","ten"][c.caps]] : c.answers;
+  const answers = c.type === "odd" ? [String(oddLayout(c).odd), "duck " + oddLayout(c).odd, "number " + oddLayout(c).odd] : c.type === "ducks" ? [String(c.caps), ["zero","one","two","three","four","five","six","seven","eight","nine","ten"][c.caps]] : c.answers;
     app.innerHTML = `
     <span class="tag">${hunt.name}</span>
     <h2>${c.title}</h2>
     <section class="card">
       <p class="progress">Challenge ${i + 1} of ${hunt.challenges.length}</p>
       <p class="riddle">${c.prompt}</p>
-      ${c.type === "ducks" ? pondSvg(c) : ""}${c.type === "spot" ? spotSvg(c) : ""}
+      ${c.type === "ducks" ? pondSvg(c) : ""}${c.type === "spot" ? spotSvg(c) : ""}${c.type === "odd" ? oddSvg(c) : ""}
       ${c.image ? `<img class="photo" src="${c.image}" alt="${c.imageAlt || "Picture clue"}">` : ""}
       <form id="f" autocomplete="off">
         <input id="ans" placeholder="Your answer" aria-label="Your answer">
