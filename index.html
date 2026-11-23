@@ -72,7 +72,7 @@ footer { margin-top: 28px; text-align: center; font-size: 14px; font-weight: 700
    same GitHub repository as this file.
    ======================================================= */
 /* The hunt the Start button on the rules page opens. Change to "h2", "h3" and so on. */
-const CURRENT_HUNT = "h4";
+const CURRENT_HUNT = "h5";
 
 const HUNTS = {
   h1: {
@@ -196,6 +196,35 @@ const HUNTS = {
         answers: ["404"],
         hint: "Both numbers are on the list. Neither of them belongs to a person.",
         next: "404. Your browser has shown you this number before, usually when something has gone missing. The duck isn't missing yet. Final riddle: Start with a vehicle that delivers parcels. Add the Dutch for 'of the'. Head in the direction of the setting sun, and finish among the houses, in Dutch. Put it all together and you have a name. Find the person who owns it and say it correctly, and the duck is yours."
+      }
+    ]
+  },
+  h5: {
+    name: "Hunt 5",
+    challenges: [
+      {
+        type: "riddle",
+        title: "Double Feature",
+        prompt: "Two films, two leads, one hunt.\nFilm one: A sharp-tongued girl who would rather be left alone. Her little sister isn't allowed to date until she does, so a boy with a bad reputation is paid to change her mind. Her family name comes from a famous playwright's hometown.\nFilm two: A cheerful insurance salesman who has never left his island. The cameras have never left him either, though he doesn't know it yet. His family name is shared with a Californian city full of film studios.\nType the surnames of both leads, film one first.",
+        answers: ["stratford burbank", "stratford and burbank", "stratford, burbank", "stratford & burbank"],
+        hint: "Film one is an old play in a new school uniform. Film two is reality TV before reality TV existed.",
+        next: "Riddle: The man in film two had a whole crew hiding behind the screen. Your next code is hiding behind one too. Find the screen that belongs to the leader of the numbers. Look at its back, not its face."
+      },
+      {
+        type: "riddle",
+        title: "Ring the Bell",
+        prompt: "The producers deliberately pair water with terror, so the salesman learns to avoid it without ever choosing to. A psychologist became famous for showing how a response can be learned this way, using dogs, food and a bell. What was his surname?",
+        answers: ["pavlov", "ivan pavlov", "dr pavlov", "pavlov's"],
+        hint: "His dogs drooled before dinner was even served.",
+        next: "The shrew in film one spent plenty of time in a certain office, though she never took the advice she was given. Your school has one too. Unscramble the anagram ROLL ON CUES to find whose door your next code is beside. Please scan quietly and don't knock."
+      },
+      {
+        type: "riddle",
+        title: "The Shrew's Bookshelf",
+        prompt: "The sharp-tongued girl from film one is often seen with her nose in a book. What is the title of the novel she reads while curled up in her chair?",
+        answers: ["the bell jar", "bell jar", "the bell jar by sylvia plath", "bell jar sylvia plath"],
+        hint: "It was written by a poet, and it's not the non-fiction one.",
+        next: "Check it out. Head to the place where silence is golden and every book has its own address. The duck is in the care of the keeper of the books. Say the title out loud, and the duck is yours. No title, no duck."
       }
     ]
   }
@@ -331,7 +360,7 @@ function render() {
     <h2>${c.title}</h2>
     <section class="card">
       <p class="progress">Challenge ${i + 1} of ${hunt.challenges.length}</p>
-      <p class="riddle">${c.prompt}</p>
+      <p class="riddle">${c.prompt.replace(/\n/g, "<br><br>")}</p>
       ${c.type === "ducks" ? pondSvg(c) : ""}${c.type === "spot" ? spotSvg(c) : ""}${c.type === "odd" ? oddSvg(c) : ""}${c.type === "eq" ? eqSvg(c) : ""}
       ${c.image ? `<img class="photo" src="${c.image}" alt="${c.imageAlt || "Picture clue"}">` : ""}
       <form id="f" autocomplete="off">
