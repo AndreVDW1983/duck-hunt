@@ -72,7 +72,7 @@ footer { margin-top: 28px; text-align: center; font-size: 14px; font-weight: 700
    same GitHub repository as this file.
    ======================================================= */
 /* The hunt the Start button on the rules page opens. Change to "h2", "h3" and so on. */
-const CURRENT_HUNT = "h5";
+const CURRENT_HUNT = "h6";
 
 const HUNTS = {
   h1: {
@@ -227,6 +227,36 @@ const HUNTS = {
         next: "Check it out. Head to the place where silence is golden and every book has its own address. The duck is in the care of the keeper of the books. Tell them the title of the novel the shrew reads while curled up in her chair. No title, no duck."
       }
     ]
+  },
+  h6: {
+    name: "The Last Quack",
+    challenges: [
+      {
+        type: "riddle",
+        title: "Staffroom Scramble",
+        prompt: "Welcome to the finale. Today's prize is a duck mug, and it's worth the hunt.\nSix everyday staffroom objects are hiding inside these words. Unscramble each one, then read the first letters of your answers in order to find where your next code is hiding.\nNIB \u00b7 PALM \u00b7 KIN \u00b7 TONE \u00b7 REWARD \u00b7 SKIN",
+        answers: ["blinds", "the blinds", "behind the blinds"],
+        hint: "Every scrambled word is already a real word, which is exactly what makes them sneaky. Think about what you'd find on a desk or in the kitchen.",
+        next: "Go and look behind them. Gently."
+      },
+      {
+        type: "pigpen",
+        title: "Pigpen",
+        prompt: "This message is written in a secret code used by Freemasons in the 1700s. Each shape stands for one letter. Crack it to find where your next code is pinned.",
+        text: "PINBOARD",
+        answers: ["pinboard", "pin board", "the pinboard", "noticeboard", "notice board", "the noticeboard", "corkboard", "cork board"],
+        hint: "The code is named after the place a farmer keeps the oinkers. Look up its key: the shapes come from a noughts-and-crosses grid.",
+        next: "Your last code is pinned there among the notices. It's small, so look carefully."
+      },
+      {
+        type: "riddle",
+        title: "Top of the School",
+        prompt: "Spell me one way and I'm a rule you live by. Spell me the other way and I'm your pal. I sit at the very top of this school. Who am I?",
+        answers: ["principal", "the principal", "mr chapman", "wayne chapman", "wayne", "chapman"],
+        hint: "Teachers remember how to spell me because I'm your 'pal'.",
+        next: "The duck mug is waiting with the person at the very top. Find them, and earn it by telling them the college motto, the words printed beneath our crest. First to say it correctly wins. Thanks for quacking along this term."
+      }
+    ]
   }
 };
 /* ======================================================= */
@@ -350,6 +380,25 @@ function eqSvg(c) {
   return `<svg class="pond" viewBox="0 0 ${W} ${H}" role="img" aria-label="Duck maths equations">${g}</svg>`;
 }
 
+/* Pigpen cipher. A-I grid, J-R grid with dot. Messages here avoid S-Z. */
+function pigpenSvg(c) {
+  const size = 44, gap = 14, letters = c.text.replace(/[^A-R]/g, "");
+  const W = letters.length * (size + gap) + gap, H = size + 2 * gap;
+  let g = "";
+  [...letters].forEach((ch, k) => {
+    let i = ch.charCodeAt(0) - 65, dot = false;
+    if (i >= 9) { i -= 9; dot = true; }
+    const r = Math.floor(i / 3), col = i % 3, x = gap + k * (size + gap), y = gap;
+    const L = (x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#111" stroke-width="4" stroke-linecap="square"/>`;
+    if (col > 0) g += L(x, y, x, y + size);
+    if (col < 2) g += L(x + size, y, x + size, y + size);
+    if (r > 0) g += L(x, y, x + size, y);
+    if (r < 2) g += L(x, y + size, x + size, y + size);
+    if (dot) g += `<circle cx="${x + size / 2}" cy="${y + size / 2}" r="5" fill="#111"/>`;
+  });
+  return `<svg class="pond" style="background:#fff" viewBox="0 0 ${W} ${H}" role="img" aria-label="A message written in pigpen cipher">${g}</svg>`;
+}
+
 function render() {
   const m = location.hash.match(/^#(h\d+)-(\d)$/);
   if (!m || !HUNTS[m[1]] || !HUNTS[m[1]].challenges[m[2] - 1]) return home();
@@ -361,7 +410,7 @@ function render() {
     <section class="card">
       <p class="progress">Challenge ${i + 1} of ${hunt.challenges.length}</p>
       <p class="riddle">${c.prompt.replace(/\n/g, "<br><br>")}</p>
-      ${c.type === "ducks" ? pondSvg(c) : ""}${c.type === "spot" ? spotSvg(c) : ""}${c.type === "odd" ? oddSvg(c) : ""}${c.type === "eq" ? eqSvg(c) : ""}
+      ${c.type === "ducks" ? pondSvg(c) : ""}${c.type === "spot" ? spotSvg(c) : ""}${c.type === "odd" ? oddSvg(c) : ""}${c.type === "eq" ? eqSvg(c) : ""}${c.type === "pigpen" ? pigpenSvg(c) : ""}
       ${c.image ? `<img class="photo" src="${c.image}" alt="${c.imageAlt || "Picture clue"}">` : ""}
       <form id="f" autocomplete="off">
         <input id="ans" placeholder="Your answer" aria-label="Your answer">
